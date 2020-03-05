@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Employee;
+use App\LoginAccessModel;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -74,6 +75,11 @@ class EmployeeController extends Controller
             $employee->status = config('GlobalValues.employeeValid');
             $employee->modified_by_access_id = $request->token->login_access_id;
             $employee->save();
+
+            $employee = LoginAccessModel::where('login_access_id',  $employee->login_access_id)->get()->first();
+            $employee->status = config('GlobalValues.employeeValid');
+            $employee->save();
+
             return response()->json(config('JsonResponse.success'));
         } else {
             return response()->json(config('JsonResponse.error_404_employee'));
@@ -91,6 +97,11 @@ class EmployeeController extends Controller
             $employee->status = config('GlobalValues.employeeDeleted');
             $employee->modified_by_access_id = $request->token->login_access_id;
             $employee->save();
+
+            $employee = LoginAccessModel::where('login_access_id', $employee->login_access_id)->get()->first();
+            $employee->status = config('GlobalValues.employeeDeleted');
+            $employee->save();
+
             return response()->json(config('JsonResponse.success'));
         } else {
             return response()->json(config('JsonResponse.error_404_employee'));

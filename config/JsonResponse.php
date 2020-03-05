@@ -8,7 +8,7 @@ return [
 
     // Error Responses
     'error' => ['status' => 'failed', 'info' => 'Unknown Error Caught'],
-    'error_404_parameter' => ['status' => 'failed', 'info' => 'Parameters not found'],
+    'error_404_parameter' => ['status' => 'failed', 'info' => 'Parameter(s) not found'],
     'error_404_token' => ['status' => 'failed', 'info' => 'Authorization token not provided'],
     'error_403_token' => ['status' => 'failed', 'info' => 'Unauthorized token provided'],
     'error_404_user_login' => ['status' => 'failed', 'info' => 'Incorrect user credentials'],
@@ -36,5 +36,5 @@ return [
     'error_same_maneger_is_already_assigned' => ['status' => 'failed', 'info' => 'Same manager is already assigned'],
     'error_employee_is_already_verified' => ['status' => 'failed', 'info' => 'Employee is already verified'],
     'error_employee_is_already_deleted' => ['status' => 'failed', 'info' => 'Employee is already deleted'],
-
+    'error_403_employee_is_not_verified' => ['status' => 'failed', 'info' => 'Employee is not verified'],
 ];

@@ -19,15 +19,18 @@ class Authenticate
     public function handle($request, Closure $next)
     {
         $token = $this->getTokenFromRequest($request);
+        $status = 200;
         
         if ($token === false) {
             $this->data = config('JsonResponse.error_404_token');
+            $status = 401;
         } else {
             $token = TokenModel::where('token', $token)->get()->first();
             if ($token && $token->status == config('GlobalValues.tokenValid')) {
                 $request->merge(['token' => $token]);
             } else {
                 $this->data = config('JsonResponse.error_403_token');
+                $status = 401;
             }
         }
         $route = $request->path();
@@ -35,7 +38,8 @@ class Authenticate
             return $next($request);
         }else{
             if(!empty($this->data)){
-                return response()->json($this->data);
+                echo $status;
+                return response()->json($this->data)->setStatusCode($status);
             }else{
                 return $next($request);
             }

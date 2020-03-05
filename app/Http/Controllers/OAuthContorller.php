@@ -15,11 +15,24 @@ class OAuthContorller extends Controller
     function register(Request $request)
     {
         $token = $request->token;
+        $status = 200;
         if ($token && $token->status == config('GlobalValues.tokenValid')) {
             // If already logged in
-            return response()->json(config('JsonResponse.error_before_register_already_logged_in'));
+            $status = 400;
+            return response()->json(config('JsonResponse.error_before_register_already_logged_in'))->setStatusCode($status);
         } else {
             // If not logged in
+
+            $mandatory_fields = ['username', 'password', 'fname', 'lname', 'email', 'mobile', 'address'];
+
+            foreach ($mandatory_fields as $value) {
+                if (!$request->input($value)) {
+                    $status = 400;
+                    $data = config('JsonResponse.error_404_parameter');
+                    $data['missing_field'] = $value;
+                    return response()->json($data)->setStatusCode($status);
+                }
+            }
 
             $username = $request->input('username');
             $password = $request->input('password');
@@ -30,13 +43,15 @@ class OAuthContorller extends Controller
             $email = $request->input('email');
             $mobile = $request->input('mobile');
             $address = $request->input('address');
-            $status = config('employeePending');
 
             if ($this->existingUsername($username)) {
+                $status = 403;
                 $this->data = config('JsonResponse.error_existing_username');
             } elseif ($this->existingEmail($email)) {
+                $status = 403;
                 $this->data = config('JsonResponse.error_existing_email');
             } elseif ($this->existingMobile($mobile)) {
+                $status = 403;
                 $this->data = config('JsonResponse.error_existing_mobile');
             } else {
                 $loginAccessModel = new LoginAccessModel;
@@ -68,21 +83,27 @@ class OAuthContorller extends Controller
                 }
             }
         }
-        return response()->json($this->data);
+        return response()->json($this->data)->setStatusCode($status);
     }
 
     function login(Request $request)
     {
+        $status = 200;
         $username = $request->input('username');
         $password = $request->input('password');
 
         if (!$username || !$password) {
             $this->data = config('JsonResponse.error_404_parameter');
+            $status = 400;
         } else {
             $employee = LoginAccessModel::where('username', $username)->get()->first();
 
-            if ($employee && Hash::check($password, $employee->password)) {
 
+            if ($employee && Hash::check($password, $employee->password)) {
+                if ($employee->status != config('GlobalValues.employeeValid')) {
+                    return response()->json(config('JsonResponse.error_403_employee_is_not_verified'));
+                    $status = 401;
+                }
                 $role = Role::find($employee->role_id);
                 $role = $role ? $role->name : '';
                 $hasToken = $this->hasToken($employee->login_access_id);
@@ -104,7 +125,7 @@ class OAuthContorller extends Controller
                 $this->data['info'] = "Invalid user credentials";
             }
         }
-        return response()->json($this->data);
+        return response()->json($this->data)->setStatusCode($status);
     }
 
     function logout(Request $request)

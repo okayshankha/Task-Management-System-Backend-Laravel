@@ -27,7 +27,7 @@ class CreateEmployeesTable extends Migration
             $table->string('description')->nullable();
             $table->string('created_by_access_id')->nullable();
             $table->string('modified_by_access_id')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->default(config('GlobalValues.employeePending'));
             $table->timestamps();
         });
     }

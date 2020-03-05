@@ -18,7 +18,7 @@ class CreateLoginAccessTable extends Migration
             $table->string('username');
             $table->string('password');
             $table->string('role_id');
-            $table->string('status')->default('pending');
+            $table->string('status')->default(config('GlobalValues.employeePending'));
             $table->timestamps();
         });
     }
