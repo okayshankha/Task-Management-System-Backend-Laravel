@@ -47,6 +47,7 @@ Route::post('/projects/assign/{employeeLoginAccessID}', 'ProjectController@assig
 Route::get('/projects/backlog', 'ProjectController@backlogs')->middleware(['authenticate', 'adminonly']);
 Route::get('/projects/inprogress', 'ProjectController@inprogress')->middleware(['authenticate', 'adminonly']);
 Route::get('/projects/done', 'ProjectController@done')->middleware(['authenticate', 'adminonly']);
+
 // Adds new project to the system [Admin only Part]
 Route::post('/projects/create', 'ProjectController@create')->middleware(['authenticate', 'adminonly']);
 
@@ -62,14 +63,17 @@ Route::get('/projects/mark/inprogress/{project_id}', 'ProjectController@markAsIn
 // Adds new task for a existing project
 Route::post('/task/create', 'TaskController@create')->middleware('authenticate');
 Route::post('/task/assign',  'TaskController@assign')->middleware('authenticate');
+
+Route::post('/task/filter', 'TaskController@allTasks')->middleware('authenticate');
+//Route::get('/task/filter/{filterByField}/{filterFieldValue}', 'TaskController@allTasks')->middleware('authenticate');
+
 // Get all the details of task
-Route::post('/task/{taskId}', 'TaskController@index')->middleware('authenticate');
+//Route::post('/task/{taskId}', 'TaskController@index')->middleware('authenticate');
 // Edit all the details of task
 Route::post('/task/edit/{taskId}', 'TaskController@edit')->middleware('authenticate');
 
 Route::get('/task/pick/{taskId}',  'TaskController@pick')->middleware('authenticate');
 Route::get('/task/all', 'TaskController@allTasks')->middleware('authenticate');
-Route::get('/task/filter/{filterByField}/{filterFieldValue}', 'TaskController@allTasks')->middleware('authenticate');
 
 
 /**

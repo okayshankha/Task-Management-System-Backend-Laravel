@@ -30,8 +30,12 @@ class TaskController extends Controller
     }
 
 
-    function allTasks(Request $request, $filterByField = null, $filterFieldValue = null)
+    //function allTasks(Request $request, $filterByField = null, $filterFieldValue = null)
+    function allTasks(Request $request)
     {
+        
+        $filterByField = $request->input('filterByField');
+        $filterFieldValue = $request->input('filterValue');
         $employee = LoginAccessModel::find($request->token->login_access_id);
         $role = null;
         if ($employee) {
@@ -224,7 +228,7 @@ class TaskController extends Controller
         $task = Task::find($taskId);
         $project = Project::find($task->project_id);
         if (!$task) {
-            
+
             return response()->json(config('JsonResponse.error_404_task'));
         } elseif ($request->input('assigned_to_login_access_id') && !LoginAccessModel::where('login_access_id', $request->input('assigned_to_login_access_id'))->get()->first()) {
             return response()->json(config('JsonResponse.error_404_employee'));
@@ -252,7 +256,7 @@ class TaskController extends Controller
                 return response()->json(config('JsonResponse.error_404_parameter'));
             }
         } else {
-            
+
             return response()->json(config('JsonResponse.error_404_task'));
         }
     }

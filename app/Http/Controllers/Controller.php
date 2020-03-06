@@ -55,7 +55,7 @@ class Controller extends BaseController
                 'task_details_id' => $task->task_details_id,
                 'name' => $task->name,
                 'parent_task_details_id' => $task->parent_task_details_id,
-                'project_id' => $task->project_id,
+                'project_id' => $project,
                 'description' => $task->description,
                 'estimated_hours' => $task->estimated_hours,
                 'actual_hours' => $task->actual_hours,
