@@ -53,6 +53,7 @@ class Controller extends BaseController
             $modified_by_employee = Employee::where('login_access_id', $task->modified_by_login_access_id)->get()->first();
             return [
                 'task_details_id' => $task->task_details_id,
+                'name' => $task->name,
                 'parent_task_details_id' => $task->parent_task_details_id,
                 'project_id' => $task->project_id,
                 'description' => $task->description,
@@ -83,6 +84,7 @@ class Controller extends BaseController
     {
         if (class_basename($employee) == "Employee") {
             return [
+                'employee_id' => $employee->employee_id,
                 'login_access_id' => $employee->login_access_id,
                 'fname' => $employee->fname,
                 'mname' => $employee->mname,

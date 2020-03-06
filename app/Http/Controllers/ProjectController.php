@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Employee;
 use App\EmployeeProjectMap;
 use App\LoginAccessModel;
 use App\Project;
@@ -14,6 +15,8 @@ class ProjectController extends Controller
     function index(Request $request, $id = null)
     {
         $login_access_id = $request->token->login_access_id;
+        $role = LoginAccessModel::where('login_access_id', $login_access_id)->get()->first();
+
         $projects = EmployeeProjectMap::where('login_access_id', $login_access_id)->get();
         $project_ids = [];
 
@@ -25,7 +28,10 @@ class ProjectController extends Controller
         $projects_list = [];
         if ($id != null) {
             $projects = Project::where('project_id', $id)->get();
-        } else {
+        } else if($role->role_id == config('GlobalValues.admin_role_id')){
+            $projects = Project::all();
+        }
+        else {
             $projects = Project::whereIn('project_id', $project_ids)
                 ->where('status', config('GlobalValues.projectInprogress'))
                 ->get();

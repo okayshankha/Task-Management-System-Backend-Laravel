@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Employee;
+use App\EmployeeProjectMap;
 use App\LoginAccessModel;
 use Illuminate\Http\Request;
 
@@ -35,11 +36,39 @@ class EmployeeController extends Controller
          */
 
         $allEmployee = [];
-        foreach (Employee::all() as $employee) {
-            if ($employee->login_access_id != $request->token->login_access_id) {
-                $allEmployee[] = $this->parseEmployeeDetails($employee);
+
+        $filter = $request->input('filterByField');
+        $value = $request->input('filterValue');;
+
+        $valid_filters = ['project_id'];
+
+        if ($filter && in_array($filter, $valid_filters)) {
+            $employees = [];
+            if($filter == $valid_filters[0]){
+                
+                $projectEmployees = EmployeeProjectMap::where('project_id', $value)->where($filter, $value)
+                                                        ->where('status', '!=', config('GlobalValues.employeesProjectMapInvalid'))
+                                                        ->pluck('login_access_id')
+                                                        ->toArray();
+                $employees = Employee::whereIn('login_access_id', $projectEmployees)->get();
+                //dd($employees);
+            }else{
+                $employees = Employee::where($filter, $value)->where('status', '!=', config('GlobalValues.employeeDeleted'))->get();
+            }
+
+            foreach ($employees as $employee) {
+                if ($employee->login_access_id != $request->token->login_access_id) {
+                    $allEmployee[] = $this->parseEmployeeDetails($employee);
+                }
+            }
+        } else {
+            foreach (Employee::where('status', '!=', config('GlobalValues.employeeDeleted'))->get() as $employee) {
+                if ($employee->login_access_id != $request->token->login_access_id) {
+                    $allEmployee[] = $this->parseEmployeeDetails($employee);
+                }
             }
         }
+
         $this->data = config('JsonResponse.success');
         $this->data['employees'] = $allEmployee;
         return response()->json($this->data);

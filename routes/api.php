@@ -61,11 +61,12 @@ Route::get('/projects/mark/inprogress/{project_id}', 'ProjectController@markAsIn
 
 // Adds new task for a existing project
 Route::post('/task/create', 'TaskController@create')->middleware('authenticate');
+Route::post('/task/assign',  'TaskController@assign')->middleware('authenticate');
 // Get all the details of task
 Route::post('/task/{taskId}', 'TaskController@index')->middleware('authenticate');
 // Edit all the details of task
 Route::post('/task/edit/{taskId}', 'TaskController@edit')->middleware('authenticate');
-Route::post('/task/assign/{taskId}',  'TaskController@assign')->middleware('authenticate');
+
 Route::get('/task/pick/{taskId}',  'TaskController@pick')->middleware('authenticate');
 Route::get('/task/all', 'TaskController@allTasks')->middleware('authenticate');
 Route::get('/task/filter/{filterByField}/{filterFieldValue}', 'TaskController@allTasks')->middleware('authenticate');
@@ -77,6 +78,7 @@ Route::get('/task/filter/{filterByField}/{filterFieldValue}', 'TaskController@al
 
 // Returns all Employees
 Route::get('/employees', 'EmployeeController@allEmployees')->middleware(['authenticate']);
+Route::post('/employees/filter', 'EmployeeController@allEmployees')->middleware(['authenticate']);
 // Returns all Managers
 Route::get('/employees/managers', 'EmployeeController@allManager')->middleware(['authenticate', 'adminonly']);
 // Assign an Employee as manager of other employee

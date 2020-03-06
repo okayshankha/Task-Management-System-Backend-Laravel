@@ -100,7 +100,7 @@ class TaskController extends Controller
                                 $tempDate[] = $val;
                             }
                         }
-                        $tempDate = implode('-',$tempDate);
+                        $tempDate = implode('-', $tempDate);
 
                         $filterFieldValue = $tempDate . "%";
                         $task_list = Task::where($filterByField, 'like', $filterFieldValue)
@@ -144,9 +144,9 @@ class TaskController extends Controller
             return response()->json(config('JsonResponse.error_401_associated_project_is_not_in_inprogress_state'));
         } elseif ($task->assigned_to_login_access_id != null) {
             return response()->json(config('JsonResponse.error_403_task_is_already_assigned'));
-        }elseif ($task->status != config('GlobalValues.taskValid')) {
+        } elseif ($task->status != config('GlobalValues.taskValid')) {
             return response()->json(config('JsonResponse.error_401_task_is_not_in_valid_state'));
-        }else {
+        } else {
             $task->assigned_to_login_access_id = $request->token->login_access_id;
             $task->assigned_by_login_access_id = $request->token->login_access_id;
             $task->assigned_at = date(config('GlobalValues.datatime_format'));
@@ -208,19 +208,31 @@ class TaskController extends Controller
         return response()->json(config('JsonResponse.success'));
     }
 
-    function assign(Request $request, $taskId)
+    function assign(Request $request)
     {
+        $taskId = $request->input('task_id');
+        $status = 200;
+
+
+        if (!$taskId) {
+            $status = 400;
+            return response()->json(config('JsonResponse.error_404_task'))->setStatusCode($status);
+        }
+
+
+
         $task = Task::find($taskId);
         $project = Project::find($task->project_id);
         if (!$task) {
+            
             return response()->json(config('JsonResponse.error_404_task'));
         } elseif ($request->input('assigned_to_login_access_id') && !LoginAccessModel::where('login_access_id', $request->input('assigned_to_login_access_id'))->get()->first()) {
             return response()->json(config('JsonResponse.error_404_employee'));
-        } elseif ($this->isEmployeeAssignedToProject($request->input('assigned_to_login_access_id'), $taskId)) {
+        } elseif (!$this->isEmployeeAssignedToProject($request->input('assigned_to_login_access_id'), $taskId)) {
             return response()->json(config('JsonResponse.error_403_employee_is_not_assigned_to_project'));
         } elseif ($project && $project->status != config('GlobalValues.projectInprogress')) {
             return response()->json(config('JsonResponse.error_401_associated_project_is_not_in_inprogress_state'));
-        }elseif ($task->status != config('GlobalValues.taskValid')) {
+        } elseif ($task->status != config('GlobalValues.taskValid')) {
             return response()->json(config('JsonResponse.error_401_task_is_not_in_valid_state'));
         }
 
@@ -240,6 +252,7 @@ class TaskController extends Controller
                 return response()->json(config('JsonResponse.error_404_parameter'));
             }
         } else {
+            
             return response()->json(config('JsonResponse.error_404_task'));
         }
     }
@@ -260,13 +273,32 @@ class TaskController extends Controller
         while (Task::find($task_id = config('GlobalValues.taskID_prefix') . $this->generateGUID()));
         $task->task_details_id = $task_id;
         $task->name = $request->input('name');
-        $task->parent_task_details_id = $request->input('parent_task_details_id');
         $task->project_id = $request->input('project_id');
+
+        if ($request->input('parent_task_details_id')) {
+            $parentTask = Task::where('task_details_id', $request->input('parent_task_details_id'))->get()->first();
+            if (!$parentTask) {
+                return response()->json(config('JsonResponse.error_404_task'));
+            }
+            $task->project_id = $parentTask->project_id;
+        }
+
+
+        $task->parent_task_details_id = $request->input('parent_task_details_id');
+
         $task->description = $request->input('description');
         $task->estimated_hours = $request->input('estimated_hours');
         $task->actual_hours = 0;
 
         if ($request->input('assigned_to_login_access_id')) {
+            $employeeProjectMap = EmployeeProjectMap::where('login_access_id', $request->input('assigned_to_login_access_id'))
+                ->where('project_id', $task->project_id)
+                ->get()
+                ->first();
+            if (!$employeeProjectMap) {
+                return response()->json(config('JsonResponse.error_403_employee_is_not_associated_with_project'));
+            }
+
             $task->assigned_to_login_access_id = $request->input('assigned_to_login_access_id');
             $task->assigned_by_login_access_id = $request->token->login_access_id;
             $task->assigned_at = date(config('GlobalValues.datatime_format'));

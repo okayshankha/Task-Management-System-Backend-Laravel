@@ -37,4 +37,5 @@ return [
     'error_employee_is_already_verified' => ['status' => 'failed', 'info' => 'Employee is already verified'],
     'error_employee_is_already_deleted' => ['status' => 'failed', 'info' => 'Employee is already deleted'],
     'error_403_employee_is_not_verified' => ['status' => 'failed', 'info' => 'Employee is not verified'],
+    'error_403_employee_is_not_associated_with_project' => ['status' => 'failed', 'info' => 'Employee is not associated with this project'],
 ];
